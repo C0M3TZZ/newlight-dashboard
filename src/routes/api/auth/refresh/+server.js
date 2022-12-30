@@ -1,3 +1,5 @@
+import { error } from '@sveltejs/kit';
+
 const DISCORD_CLIENT_ID = import.meta.env.VITE_DISCORD_CLIENT_ID;
 const DISCORD_CLIENT_SECRET = import.meta.env.VITE_DISCORD_CLIENT_SECRET;
 
@@ -5,7 +7,7 @@ const DISCORD_CLIENT_SECRET = import.meta.env.VITE_DISCORD_CLIENT_SECRET;
 export async function GET({ url }) {
 	const refreshToken = url.searchParams.get('code');
 	if (!refreshToken) {
-		throw new Error('No refresh token provided');
+		throw new error(400, 'RT Not Found');
 	}
 
 	const dataObject = {
@@ -24,9 +26,11 @@ export async function GET({ url }) {
 	});
 
 	const response = await request.json();
-
+	if (request.status != 200) {
+		throw	new error(request.status, request.statusText);
+	}
 	if (response.error) {
-		throw new Error(response.error);
+		throw new error(500, response.error);
 	}
 	return new Response(JSON.stringify({ ...response }));
 }

@@ -8,6 +8,21 @@ export async function load({ cookies }) {
 
 	if (refresh_token && !access_token) {
 		const req_refresh = await fetch(`${HOST}/api/auth/refresh?code=${refresh_token}`);
+		if (req_refresh.status == 400) {
+			cookies.set('access_token', null, {
+				path: '/',
+				httpOnly: true,
+				sameSite: 'lax',
+				expires: new Date(0),
+			});
+			cookies.set('refresh_token', null, {
+				path: '/',
+				httpOnly: true,
+				sameSite: 'lax',
+				expires: new Date(0),
+			});
+			return;
+		}
 		const getRefresh = await req_refresh.json();
 		const accessToken_expiresIn = new Date(Date.now() + getRefresh.expires_in);
 		const refreshToken_expiresIn = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -15,13 +30,13 @@ export async function load({ cookies }) {
 			path: '/',
 			expires: accessToken_expiresIn,
 			httpOnly: true,
-			sameSite: 'Strict'
+			sameSite: 'lax'
 		});
 		cookies.set('refresh_token', getRefresh.refresh_token, {
 			path: '/',
 			expires: refreshToken_expiresIn,
 			httpOnly: true,
-			sameSite: 'Strict'
+			sameSite: 'lax'
 		});
 
 		if (getRefresh.access_token) {
