@@ -7,7 +7,7 @@ export async function load({ cookies }) {
 	const refresh_token = await cookies.get('refresh_token');
 
 	if (refresh_token && !access_token) {
-		const req_refresh = await fetch(`${HOST}/api/refresh?code=${refresh_token}`);
+		const req_refresh = await fetch(`${HOST}/api/auth/refresh?code=${refresh_token}`);
 		const getRefresh = await req_refresh.json();
 		const accessToken_expiresIn = new Date(Date.now() + getRefresh.expires_in);
 		const refreshToken_expiresIn = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
