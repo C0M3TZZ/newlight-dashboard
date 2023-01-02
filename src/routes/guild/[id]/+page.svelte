@@ -37,6 +37,13 @@
 		duration: 200,
 		easing: sineIn
 	};
+
+	let defaultRole = {
+		name: '',
+		desc: '',
+		emoji: ''
+	};
+
 	let roleMenu = [];
 	let roleMenuData = [];
 	/** @type {import('./$types').PageData} */
@@ -208,7 +215,13 @@
 			<span> Name </span>
 			<Input placeholder="Role Menu 01" />
 		</Label>
-		<Button on:click={() => {roleMenu.push("_"); roleMenu = roleMenu;}} class="w-full">Create</Button>
+		<Button
+			on:click={() => {
+				roleMenu.push('_');
+				roleMenu = roleMenu;
+			}}
+			class="w-full">Create</Button
+		>
 	</div>
 </Modal>
 
@@ -235,11 +248,12 @@
 					<div class="flex flex-col gap-4">
 						<Input />
 						<Input />
+						<Select />
 					</div>
 					<div class="flex justify-between">
 						<Button class="text-xl">✨</Button>
 						<ButtonGroup>
-							<Button color="green"><Icon icon="material-symbols:save" class="text-xl" /></Button>
+							<!-- <Button color="green"><Icon icon="material-symbols:save" class="text-xl" /></Button> -->
 							<Button><Icon icon="material-symbols:arrow-upward-rounded" class="text-xl" /></Button>
 							<Button
 								><Icon icon="material-symbols:arrow-downward-rounded" class="text-xl" /></Button
@@ -254,13 +268,16 @@
 		{/each}
 	</div>
 	<svelte:fragment slot="footer">
-		<Button
-			class="w-full"
-			on:click={() => {
-				roleMenuData.push('a');
-				roleMenuData = roleMenuData;
-				console.log('ADD MORE');
-			}}>+</Button
-		>
+		<ButtonGroup class="w-full">
+			<Button
+				class="w-full"
+				on:click={() => {
+					roleMenuData.push('a');
+					roleMenuData = roleMenuData;
+					console.log('ADD MORE');
+				}}>+</Button
+			>
+			<Button class="w-full" color="green"><Icon icon="material-symbols:save" class="text-xl" /></Button>
+		</ButtonGroup>
 	</svelte:fragment>
 </Modal>
