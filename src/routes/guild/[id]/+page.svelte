@@ -19,8 +19,6 @@
 		Label,
 		ButtonGroup,
 		Select,
-		Accordion,
-		AccordionItem
 	} from 'flowbite-svelte';
 	import Icon from '@iconify/svelte';
 	import { sineIn } from 'svelte/easing';
@@ -41,10 +39,65 @@
 	let defaultRole = {
 		name: '',
 		desc: '',
-		emoji: ''
+		emoji: '',
+		roleId: null
 	};
 
+	const createRoleMenu = () => {
+		roleMenu.push({
+			name: form.crateForm.name,
+			roles: [defaultRole]
+		});
+		roleMenu = roleMenu;
+		form.crateForm.name = '';
+		createRoleModal = false;
+	};
+
+	const editRoleMenu = (index) => {
+		selectRoleMenu = index;
+		editRoleModal = true;
+	};
+
+	const deleteRoleMenuModal = (index) => {
+		selectRoleMenu = index;
+		deleteRoleModal = true;
+	};
+
+	const deleteRoleMenu = () => {
+		roleMenu.splice(selectRoleMenu, 1);
+		roleMenu = roleMenu;
+		deleteRoleModal = false;
+	};
+
+	const addRole = () => {
+		roleMenu[selectRoleMenu].roles.push({
+			defaultRole
+		});
+		roleMenu = roleMenu;
+	};
+
+	const swapRole = (index, destination) => {
+		if (index + destination < 0 || index + destination >= roleMenu[selectRoleMenu].roles.length) {
+			return;
+		}
+		const temp = roleMenu[selectRoleMenu].roles[index];
+		roleMenu[selectRoleMenu].roles[index] = roleMenu[selectRoleMenu].roles[index + destination];
+		roleMenu[selectRoleMenu].roles[index + destination] = temp;
+		roleMenu = roleMenu;
+	};
+
+	const deleteRole = (index) => {
+		roleMenu[selectRoleMenu].roles.splice(index, 1);
+		roleMenu = roleMenu;
+	};
+
+	let form = {
+		crateForm: {
+			name: ''
+		}
+	};
 	let roleMenu = [];
+	let selectRoleMenu = 0;
 	let roleMenuData = [];
 	/** @type {import('./$types').PageData} */
 	export let data;
@@ -137,11 +190,16 @@
 					>
 				</div>
 				<div class="max-h-48 overflow-y-scroll">
-					<div class="p-2" use:autoAnimate>
-						{#each roleMenu as role}
-							<Card size="lg">
+					<div class="p-2 gap-4 flex flex-col" use:autoAnimate>
+						{#if roleMenu.length == 0}
+							<div class="flex justify-center">
+								<h1 class="text-lg text-bold">You don't have any Role Menu.</h1>
+							</div>
+						{/if}
+						{#each roleMenu as role, index}
+							<Card size="lg" class="w-full">
 								<div class="flex justify-between">
-									<h1 class="text-xl inline-flex items-center">Guild</h1>
+									<h1 class="text-xl inline-flex items-center">{role.name}</h1>
 									<ButtonGroup>
 										<Button
 											on:click={() => {
@@ -150,13 +208,14 @@
 										>
 										<Button
 											on:click={() => {
-												editRoleModal = true;
+												editRoleMenu(index);
+												// editRoleModal = true;
 											}}><Icon icon="ri:settings-4-fill" class="text-xl" /></Button
 										>
 										<Button
 											color="red"
 											on:click={() => {
-												deleteRoleModal = true;
+												deleteRoleMenuModal(index);
 											}}><Icon icon="ri:close-fill" class="text-xl" /></Button
 										>
 									</ButtonGroup>
@@ -213,12 +272,11 @@
 	<div class="flex gap-4 flex-col">
 		<Label class="space-y-2">
 			<span> Name </span>
-			<Input placeholder="Role Menu 01" />
+			<Input bind:value={form.crateForm.name} placeholder="Role Menu 01" />
 		</Label>
 		<Button
 			on:click={() => {
-				roleMenu.push('_');
-				roleMenu = roleMenu;
+				createRoleMenu();
 			}}
 			class="w-full">Create</Button
 		>
@@ -233,33 +291,50 @@
 	</Label>
 </Modal>
 
-<Modal bind:open={deleteRoleModal} title="Delete NAME?" size="xs" autoclose>
+<Modal bind:open={deleteRoleModal} title="Delete NAME?" size="xs">
 	<div class="flex gap-4">
 		<Button color="alternative" class="w-full">Cancel</Button>
-		<Button color="red" class="w-full">Delete</Button>
+		<Button
+			on:click={() => {
+				deleteRoleMenu();
+			}}
+			color="red"
+			class="w-full">Delete</Button
+		>
 	</div>
 </Modal>
 
 <Modal bind:open={editRoleModal} title="Edit Name">
 	<div use:autoAnimate class="flex flex-col gap-4">
-		{#each roleMenuData as role}
+		{#each roleMenu[selectRoleMenu].roles as role, index}
 			<Card size="lg" class="w-full">
 				<div class="flex gap-4 flex-col">
 					<div class="flex flex-col gap-4">
-						<Input />
-						<Input />
-						<Select />
+						<Input placeholder="Name" bind:value={role.name} />
+						<Input placeholder="Description" bind:value={role.desc}/>
+						<Select placeholder="Choose the emoji." />
 					</div>
 					<div class="flex justify-between">
-						<Button class="text-xl">✨</Button>
+						<Button color="alternative" class="text-xl">✨</Button>
 						<ButtonGroup>
 							<!-- <Button color="green"><Icon icon="material-symbols:save" class="text-xl" /></Button> -->
-							<Button><Icon icon="material-symbols:arrow-upward-rounded" class="text-xl" /></Button>
 							<Button
-								><Icon icon="material-symbols:arrow-downward-rounded" class="text-xl" /></Button
+								disabled={index === 0}
+								on:click={() => {
+									swapRole(index, -1);
+								}}><Icon icon="material-symbols:arrow-upward-rounded" class="text-xl" /></Button
 							>
-							<Button color="red"
-								><Icon icon="material-symbols:close-rounded" class="text-xl" /></Button
+							<Button
+								disabled={index === roleMenu[selectRoleMenu].roles.length - 1}
+								on:click={() => {
+									swapRole(index, 1);
+								}}><Icon icon="material-symbols:arrow-downward-rounded" class="text-xl" /></Button
+							>
+							<Button
+								color="red"
+								on:click={() => {
+									deleteRole(index);
+								}}><Icon icon="material-symbols:close-rounded" class="text-xl" /></Button
 							>
 						</ButtonGroup>
 					</div>
@@ -272,12 +347,12 @@
 			<Button
 				class="w-full"
 				on:click={() => {
-					roleMenuData.push('a');
-					roleMenuData = roleMenuData;
-					console.log('ADD MORE');
+					addRole();
 				}}>+</Button
 			>
-			<Button class="w-full" color="green"><Icon icon="material-symbols:save" class="text-xl" /></Button>
+			<Button class="w-full" color="green"
+				><Icon icon="material-symbols:save" class="text-xl" /></Button
+			>
 		</ButtonGroup>
 	</svelte:fragment>
 </Modal>
