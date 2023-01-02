@@ -52,7 +52,7 @@
 				</span>
 			</DropdownHeader>
 			<!-- <DropdownDivider /> -->
-			<DropdownItem href="/api/auth/signout">Sign out</DropdownItem>
+			<DropdownItem href="/api/auth/signout">Sign out<span></span></DropdownItem>
 		</Dropdown>
 	{/if}
 	<NavUl {hidden} class="order-1">
