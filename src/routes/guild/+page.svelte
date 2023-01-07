@@ -4,6 +4,7 @@
 	import { browser } from '$app/environment';
 
 	const guilds = $page.data.guilds;
+	const user = $page.data.user;
 
 	let message = null;
 
@@ -15,7 +16,11 @@
 			}
 		} else {
       if (browser) {
-        window.location.reload();
+				if (user) {
+					window.location.reload();
+				} else {
+					goto('/');
+				}
       }
 		}
 	} else {

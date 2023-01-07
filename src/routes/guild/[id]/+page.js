@@ -9,10 +9,12 @@ export async function load({ params, parent }) {
 	if (req_guild.status !== 404) {
 		return {
 			guild: await getGuild,
+			roleMenu: []
 		};
 	} else {
 		return {
 			guild: null,
+			roleMenu: []
 		};
 	}
 }
