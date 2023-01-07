@@ -33,6 +33,7 @@
 	"type": "module",
 	"dependencies": {
 		"@formkit/auto-animate": "1.0.0-beta.5",
+		"@picmo/popup-picker": "^5.7.2",
 		"picmo": "^5.7.2"
 	}
 }
