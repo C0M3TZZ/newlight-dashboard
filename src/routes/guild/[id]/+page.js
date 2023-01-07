@@ -4,16 +4,23 @@ const HOST = import.meta.env.VITE_HOST;
 export async function load({ params, parent }) {
 	const req_guild = await fetch(`${HOST}/api/discord/guild/${params.id}`);
 	const getGuild = await req_guild.json();
-	// const req_channels = await fetch(`${HOST}/api/discord/guild/${params.id}/channels`);
+	const req_channels = await fetch(`${HOST}/api/discord/guild/${params.id}/channels`);
+
+	let channels = [];
+	if (req_channels.status === 200) {
+		channels = await req_channels.json();
+	}
 
 	if (req_guild.status !== 404) {
 		return {
 			guild: await getGuild,
+			channels: channels,
 			roleMenu: []
 		};
 	} else {
 		return {
 			guild: null,
+			channels: channels,
 			roleMenu: []
 		};
 	}

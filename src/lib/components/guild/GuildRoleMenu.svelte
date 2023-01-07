@@ -1,17 +1,24 @@
 <script>
 	import { page } from '$app/stores';
-	import { Card, Button, Modal, Input, Label, ButtonGroup, Select } from 'flowbite-svelte';
+	import { Card, Button, Modal, Input, Label, ButtonGroup, Select, Dropdown, DropdownItem } from 'flowbite-svelte';
 	import Icon from '@iconify/svelte';
 	import autoAnimate from '@formkit/auto-animate';
+	import EmojiPicker from '../EmojiPicker.svelte';
+
+	export let data;
 
 	let createRoleModal = false;
 	let sendRoleModal = false;
 	let deleteRoleModal = false;
 	let editRoleModal = false;
 
-	let roleMenu = $page.data.roleMenu;
+	let roleMenu = data.roleMenu;
+	let guildRoles = data.guild.roles.filter((role) => role.name !== '@everyone' && !role.managed);
+	guildRoles = guildRoles.map(role => {return { name: role.name, value: role.id }});
 	let selectRoleMenu = 0;
 	let createRoleMenuInput = '';
+	let guildChannels = data.channels.filter((channel) => channel.type === 0);
+	guildChannels = guildChannels.map(channel => {return { name: channel.name, value: channel.id }});
 
 	const createRoleMenu = () => {
 		roleMenu.push({
@@ -20,7 +27,7 @@
 				{
 					name: '',
 					desc: '',
-					emoji: '',
+					emoji: '🎉',
 					roleId: null
 				}
 			]
@@ -50,7 +57,7 @@
 		roleMenu[selectRoleMenu].roles.push({
 			name: '',
 			desc: '',
-			emoji: '',
+			emoji: '🎉',
 			roleId: null
 		});
 		roleMenu = roleMenu;
@@ -69,6 +76,10 @@
 	const deleteRole = (index) => {
 		roleMenu[selectRoleMenu].roles.splice(index, 1);
 		roleMenu = roleMenu;
+	};
+
+	const emojiSelect = (events, index) => {
+		roleMenu[selectRoleMenu].roles[index].emoji = events.detail.emoji;
 	};
 </script>
 
@@ -138,7 +149,7 @@
 <Modal bind:open={sendRoleModal} size="xs" title="Select channel to send Role Menu" autoclose>
 	<Label class="flex flex-col gap-4 text-start">
 		<span> Channel </span>
-		<Select />
+		<Select items={guildChannels} />
 		<Button>Send</Button>
 	</Label>
 </Modal>
@@ -164,10 +175,13 @@
 					<div class="flex flex-col gap-4">
 						<Input placeholder="Name" bind:value={role.name} />
 						<Input placeholder="Description" bind:value={role.desc} />
-						<Select placeholder="Choose the emoji." />
+						<Select items={guildRoles} placeholder="Choose role." />
 					</div>
 					<div class="flex justify-between">
-						<Button color="alternative" class="text-xl">✨</Button>
+						<Button color="alternative" class="text-xl">{role.emoji}</Button>
+						<Dropdown class="w-full">
+							<EmojiPicker on:emojiSelect={(event) => {emojiSelect(event, index)}}></EmojiPicker>
+						</Dropdown>
 						<ButtonGroup>
 							<Button
 								disabled={index === 0}

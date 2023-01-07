@@ -10,6 +10,8 @@
 
   export let data;
   const guild = data.guild;
+  let guildRoles = data.guild.roles.filter((role) => role.name !== '@everyone' && !role.managed);
+	guildRoles = guildRoles.map(role => {return { name: role.name, value: role.id }});
 </script>
 
 <Card size="lg">
@@ -28,7 +30,7 @@
         </div>
         <Button><Chevron>Role Access</Chevron></Button>
         <Dropdown>
-          {#each guild.roles as role}
+          {#each guildRoles as role}
             <DropdownItem>
               <Checkbox>{role.name}</Checkbox>
             </DropdownItem>

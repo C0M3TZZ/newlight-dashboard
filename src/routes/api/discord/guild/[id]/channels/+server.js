@@ -9,11 +9,9 @@ export async function GET({ params }) {
 			Authorization: `Bot ${import.meta.env.VITE_DISCORD_BOT_TOKEN}`
 		}
 	});
-  // console.log(req_guild);
   if (req_guild.status === 200) {
     const allChannels = await req_guild.json();
     const textChannels = allChannels.filter(channel => channel.type === 0);
-    console.log(textChannels);
     return new Response(JSON.stringify(textChannels), {
       headers: {
         'Content-Type': 'application/json'
