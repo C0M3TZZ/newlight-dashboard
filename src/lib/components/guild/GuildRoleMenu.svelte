@@ -1,9 +1,9 @@
 <script>
-	import { page } from '$app/stores';
 	import { Card, Button, Modal, Input, Label, ButtonGroup, Select, Dropdown, DropdownItem } from 'flowbite-svelte';
 	import Icon from '@iconify/svelte';
 	import autoAnimate from '@formkit/auto-animate';
 	import EmojiPicker from '../EmojiPicker.svelte';
+	import { addToast } from '$lib/toastManager';
 
 	export let data;
 
@@ -23,17 +23,11 @@
 	const createRoleMenu = () => {
 		roleMenu.push({
 			name: createRoleMenuInput,
-			roles: [
-				{
-					name: '',
-					desc: '',
-					emoji: '🎉',
-					roleId: null
-				}
-			]
+			roles: []
 		});
 		roleMenu = roleMenu;
 		createRoleMenuInput = '';
+		addToast('Role menu created');
 		createRoleModal = false;
 	};
 
@@ -58,7 +52,7 @@
 			name: '',
 			desc: '',
 			emoji: '🎉',
-			roleId: null
+			roleId: ''
 		});
 		roleMenu = roleMenu;
 	};
@@ -169,13 +163,16 @@
 
 <Modal bind:open={editRoleModal} title="Edit Name">
 	<div use:autoAnimate class="flex flex-col gap-4">
+		{#if roleMenu[selectRoleMenu].roles.length == 0}
+			<p>Please add role.</p>
+		{/if}
 		{#each roleMenu[selectRoleMenu].roles as role, index}
 			<Card size="lg" class="w-full">
 				<div class="flex gap-4 flex-col">
 					<div class="flex flex-col gap-4">
 						<Input placeholder="Name" bind:value={role.name} />
 						<Input placeholder="Description" bind:value={role.desc} />
-						<Select items={guildRoles} placeholder="Choose role." />
+						<Select items={guildRoles} bind:value={role.roleId} placeholder="Choose role." />
 					</div>
 					<div class="flex justify-between">
 						<Button color="alternative" class="text-xl">{role.emoji}</Button>

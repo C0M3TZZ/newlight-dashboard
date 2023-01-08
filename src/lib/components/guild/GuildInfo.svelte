@@ -12,6 +12,7 @@
   const guild = data.guild;
   let guildRoles = data.guild.roles.filter((role) => role.name !== '@everyone' && !role.managed);
 	guildRoles = guildRoles.map(role => {return { name: role.name, value: role.id }});
+  let roles = [];
 </script>
 
 <Card size="lg">
@@ -32,7 +33,7 @@
         <Dropdown>
           {#each guildRoles as role}
             <DropdownItem>
-              <Checkbox>{role.name}</Checkbox>
+              <Checkbox bind:group={roles} value={role.value}>{role.name}</Checkbox>
             </DropdownItem>
           {/each}
         </Dropdown>
