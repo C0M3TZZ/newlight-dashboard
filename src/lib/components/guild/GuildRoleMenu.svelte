@@ -1,5 +1,15 @@
 <script>
-	import { Card, Button, Modal, Input, Label, ButtonGroup, Select, Dropdown, DropdownItem } from 'flowbite-svelte';
+	import {
+		Card,
+		Button,
+		Modal,
+		Input,
+		Label,
+		ButtonGroup,
+		Select,
+		Dropdown,
+		Helper
+	} from 'flowbite-svelte';
 	import Icon from '@iconify/svelte';
 	import autoAnimate from '@formkit/auto-animate';
 	import EmojiPicker from '../EmojiPicker.svelte';
@@ -14,13 +24,46 @@
 
 	let roleMenu = data.roleMenu;
 	let guildRoles = data.guild.roles.filter((role) => role.name !== '@everyone' && !role.managed);
-	guildRoles = guildRoles.map(role => {return { name: role.name, value: role.id }});
+	guildRoles = guildRoles.map((role) => {
+		return { name: role.name, value: role.id };
+	});
 	let selectRoleMenu = 0;
 	let createRoleMenuInput = '';
+	let sendChannelValue = '';
 	let guildChannels = data.channels.filter((channel) => channel.type === 0);
-	guildChannels = guildChannels.map(channel => {return { name: channel.name, value: channel.id }});
+	guildChannels = guildChannels.map((channel) => {
+		return { name: channel.name, value: channel.id };
+	});
+
+	let sendChannelValid = '';
+	let roleMenuEmpty = '';
+	let createRoleMenuValid = '';
+
+	const validatorRequire = (value) => {
+		if (value.length < 1) {
+			return false;
+		}
+		return true;
+	};
+
+	const sendChannel = () => {
+		sendChannelValid = validatorRequire(sendChannelValue);
+		if (!sendChannelValid) {
+			return;
+		}
+		roleMenuEmpty = validatorRequire(roleMenu[selectRoleMenu].roles);
+		if (!roleMenuEmpty) {
+			return;
+		}
+		sendRoleModal = false;
+		sendChannelValue = '';
+	};
 
 	const createRoleMenu = () => {
+		createRoleMenuValid = validatorRequire(createRoleMenuInput);
+		if (!createRoleMenuValid) {
+			return;
+		}
 		roleMenu.push({
 			name: createRoleMenuInput,
 			roles: []
@@ -52,9 +95,22 @@
 			name: '',
 			desc: '',
 			emoji: '🎉',
-			roleId: ''
+			roleId: '',
+			validate: ''
 		});
 		roleMenu = roleMenu;
+	};
+
+	const saveRole = () => {
+		roleMenu[selectRoleMenu].roles.forEach((role) => {
+			role.validate =
+				validatorRequire(role.name) && validatorRequire(role.desc) && validatorRequire(role.roleId);
+		});
+		roleMenu = roleMenu;
+		if (!roleMenu[selectRoleMenu].roles.every((role) => role.validate)) {
+			return;
+		}
+		editRoleModal = false;
 	};
 
 	const swapRole = (index, destination) => {
@@ -125,11 +181,20 @@
 	</div>
 </Card>
 
-<Modal title="Create Role Menu" size="xs" bind:open={createRoleModal} autoclose>
+<Modal title="Create Role Menu" size="xs" bind:open={createRoleModal}>
 	<div class="flex gap-4 flex-col">
 		<Label class="space-y-2 text-start">
 			<span> Name </span>
-			<Input bind:value={createRoleMenuInput} placeholder="Role Menu 01" />
+			<Input
+				bind:value={createRoleMenuInput}
+				on:input={() => {
+					createRoleMenuValid = validatorRequire(createRoleMenuInput);
+				}}
+				placeholder="Role Menu 01"
+			/>
+			{#if createRoleMenuValid === false}
+				<Helper color="red">Name is require.</Helper>
+			{/if}
 		</Label>
 		<Button
 			on:click={() => {
@@ -140,15 +205,26 @@
 	</div>
 </Modal>
 
-<Modal bind:open={sendRoleModal} size="xs" title="Select channel to send Role Menu" autoclose>
-	<Label class="flex flex-col gap-4 text-start">
+<Modal bind:open={sendRoleModal} size="xs" title="Select channel to send Role Menu">
+	<Label class="flex flex-col space-y-2 text-start">
 		<span> Channel </span>
-		<Select items={guildChannels} />
-		<Button>Send</Button>
+		<Select bind:value={sendChannelValue} items={guildChannels} />
+		{#if sendChannelValid === false}
+			<Helper color="red">Please Select Text Channel To Send.</Helper>
+		{/if}
+		{#if roleMenuEmpty === false}
+			<Helper color="red">Rolemenu is empty.</Helper>
+		{/if}
 	</Label>
+	<Button
+		class="w-full"
+		on:click={() => {
+			sendChannel();
+		}}>Send</Button
+	>
 </Modal>
 
-<Modal bind:open={deleteRoleModal} title="Delete NAME?" size="xs">
+<Modal bind:open={deleteRoleModal} title={`Delete ${roleMenu[selectRoleMenu]?.name}?`} size="xs">
 	<div class="flex gap-4">
 		<Button color="alternative" class="w-full">Cancel</Button>
 		<Button
@@ -161,7 +237,7 @@
 	</div>
 </Modal>
 
-<Modal bind:open={editRoleModal} title="Edit Name">
+<Modal bind:open={editRoleModal} title={`Edit ${roleMenu[selectRoleMenu]?.name}`}>
 	<div use:autoAnimate class="flex flex-col gap-4">
 		{#if roleMenu[selectRoleMenu].roles.length == 0}
 			<p>Please add role.</p>
@@ -177,7 +253,11 @@
 					<div class="flex justify-between">
 						<Button color="alternative" class="text-xl">{role.emoji}</Button>
 						<Dropdown class="w-full">
-							<EmojiPicker on:emojiSelect={(event) => {emojiSelect(event, index)}}></EmojiPicker>
+							<EmojiPicker
+								on:emojiSelect={(event) => {
+									emojiSelect(event, index);
+								}}
+							/>
 						</Dropdown>
 						<ButtonGroup>
 							<Button
@@ -200,6 +280,11 @@
 							>
 						</ButtonGroup>
 					</div>
+					{#if !role.validate}
+						<div class="flex justify-start">
+							<Helper color="red">This Role is not compele.</Helper>
+						</div>
+					{/if}
 				</div>
 			</Card>
 		{/each}
@@ -212,8 +297,12 @@
 					addRole();
 				}}><Icon icon="material-symbols:add-rounded" /></Button
 			>
-			<Button class="w-full" color="green"
-				><Icon icon="material-symbols:save" class="text-xl" /></Button
+			<Button
+				class="w-full"
+				color="green"
+				on:click={() => {
+					saveRole();
+				}}><Icon icon="material-symbols:save" class="text-xl" /></Button
 			>
 		</ButtonGroup>
 	</svelte:fragment>

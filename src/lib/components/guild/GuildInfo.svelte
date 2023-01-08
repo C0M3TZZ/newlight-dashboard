@@ -15,12 +15,12 @@
   let roles = [];
 </script>
 
+{#if guild.owner_id == data.user.id}
 <Card size="lg">
   <div class="flex flex-col gap-2">
     <div class="flex justify-start">
       <h1 class="text-lg text-bold">Guild Info</h1>
     </div>
-    {#if guild.owner_id == data.user.id}
       <Card size="lg">
         <div class="flex">
           <h1 class="text-start mb-4">
@@ -38,6 +38,6 @@
           {/each}
         </Dropdown>
       </Card>
-    {/if}
-  </div>
-</Card>
+    </div>
+  </Card>
+  {/if}
