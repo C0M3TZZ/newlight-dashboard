@@ -39,6 +39,10 @@
 	let roleMenuEmpty = '';
 	let createRoleMenuValid = '';
 
+	$: {
+		console.log(roleMenu);
+	}
+
 	const validatorRequire = (value) => {
 		if (value.length < 1) {
 			return false;
@@ -280,7 +284,7 @@
 							>
 						</ButtonGroup>
 					</div>
-					{#if !role.validate}
+					{#if role.validate === false}
 						<div class="flex justify-start">
 							<Helper color="red">This Role is not compele.</Helper>
 						</div>

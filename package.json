@@ -25,6 +25,7 @@
 		"postcss-load-config": "^4.0.1",
 		"prettier": "^2.8.0",
 		"prettier-plugin-svelte": "^2.8.1",
+		"prisma": "^4.8.1",
 		"svelte": "^3.54.0",
 		"svelte-preprocess": "^4.10.7",
 		"tailwindcss": "^3.1.5",
@@ -33,6 +34,7 @@
 	"type": "module",
 	"dependencies": {
 		"@formkit/auto-animate": "1.0.0-beta.5",
+		"@prisma/client": "^4.8.1",
 		"picmo": "^5.7.2"
 	}
 }
