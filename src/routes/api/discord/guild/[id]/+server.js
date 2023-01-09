@@ -10,8 +10,7 @@ export async function GET({ params }) {
 		}
 	});
 	const getGuild = await req_guild.json();
-  
-	if (getGuild.code === 50001) {
+	if (getGuild.code === 50001 || getGuild.code === 10004) {
 		throw new error(404, "Bot Can't Access Guild");
 	} else {
 		return new Response(JSON.stringify(getGuild), {

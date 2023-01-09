@@ -7,6 +7,7 @@
 	import GuildRoleMenu from '$lib/components/guild/GuildRoleMenu.svelte';
 	/** @type {import('./$types').PageData} */
 	export let data;
+
 </script>
 
 <center class="py-2 space-y-2">
