@@ -1,5 +1,6 @@
 const DISCORD_API_URL = import.meta.env.VITE_DISCORD_API_URL;
 
+
 /** @type {import('./$types').LayoutServerLoad} */
 export async function load({ cookies }) {
   const access_token = await cookies.get('access_token');

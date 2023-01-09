@@ -5,7 +5,7 @@ export async function load({ params, parent }) {
 	const req_guild = await fetch(`${HOST}/api/discord/guild/${params.id}`);
 	const getGuild = await req_guild.json();
 	const req_channels = await fetch(`${HOST}/api/discord/guild/${params.id}/channels`);
-
+	const guildId = params.id;
 	let channels = [];
 	if (req_channels.status === 200) {
 		channels = await req_channels.json();
@@ -15,13 +15,13 @@ export async function load({ params, parent }) {
 		return {
 			guild: await getGuild,
 			channels: channels,
-			roleMenu: []
+			guildId
 		};
 	} else {
 		return {
 			guild: null,
 			channels: channels,
-			roleMenu: []
+			guildId
 		};
 	}
 }

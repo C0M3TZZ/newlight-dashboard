@@ -8,7 +8,8 @@
 		ButtonGroup,
 		Select,
 		Dropdown,
-		Helper
+		Helper,
+		Spinner
 	} from 'flowbite-svelte';
 	import Icon from '@iconify/svelte';
 	import autoAnimate from '@formkit/auto-animate';
@@ -16,11 +17,13 @@
 	import { addToast } from '$lib/toastManager';
 
 	export let data;
-
+	let createRoleLoading = false;
 	let createRoleModal = false;
 	let sendRoleModal = false;
+	let deleteRoleLoading = false;
 	let deleteRoleModal = false;
 	let editRoleModal = false;
+	let saveRoleLoading = false;
 
 	let roleMenu = data.roleMenu;
 	let guildRoles = data.guild.roles.filter((role) => role.name !== '@everyone' && !role.managed);
@@ -38,10 +41,6 @@
 	let sendChannelValid = '';
 	let roleMenuEmpty = '';
 	let createRoleMenuValid = '';
-
-	$: {
-		console.log(roleMenu);
-	}
 
 	const validatorRequire = (value) => {
 		if (value.length < 1) {
@@ -63,16 +62,27 @@
 		sendChannelValue = '';
 	};
 
-	const createRoleMenu = () => {
+	const createRoleMenu = async () => {
 		createRoleMenuValid = validatorRequire(createRoleMenuInput);
-		if (!createRoleMenuValid) {
+		if (!createRoleMenuValid || createRoleLoading) {
 			return;
 		}
-		roleMenu.push({
-			name: createRoleMenuInput,
-			roles: []
+		createRoleLoading = true;
+		const req = await fetch(`/api/guild/${data.guild.id}/rolemenu`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				name: createRoleMenuInput
+			})
 		});
-		roleMenu = roleMenu;
+		createRoleLoading = false;
+		if (!req.ok) {
+			return;
+		}
+		const res = await req.json();
+		roleMenu = res;
 		createRoleMenuInput = '';
 		addToast('Role menu created');
 		createRoleModal = false;
@@ -88,9 +98,20 @@
 		deleteRoleModal = true;
 	};
 
-	const deleteRoleMenu = () => {
-		roleMenu.splice(selectRoleMenu, 1);
-		roleMenu = roleMenu;
+	const deleteRoleMenu = async () => {
+		if (deleteRoleLoading) {
+			return;
+		}
+		deleteRoleLoading = true;
+		const req = await fetch(`/api/guild/${data.guild.id}/rolemenu/${roleMenu[selectRoleMenu].id}`, {
+			method: 'DELETE'
+		});
+		if (!req.ok) {
+			return;
+		}
+		deleteRoleLoading = false;
+		const res = await req.json();
+		roleMenu = res;
 		deleteRoleModal = false;
 	};
 
@@ -105,7 +126,7 @@
 		roleMenu = roleMenu;
 	};
 
-	const saveRole = () => {
+	const saveRole = async () => {
 		roleMenu[selectRoleMenu].roles.forEach((role) => {
 			role.validate =
 				validatorRequire(role.name) && validatorRequire(role.desc) && validatorRequire(role.roleId);
@@ -114,6 +135,20 @@
 		if (!roleMenu[selectRoleMenu].roles.every((role) => role.validate)) {
 			return;
 		}
+		saveRoleLoading = true;
+		const req = await fetch(`/api/guild/${data.guild.id}/rolemenu/${roleMenu[selectRoleMenu].id}`, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				roles: roleMenu[selectRoleMenu].roles
+			})
+		});
+		saveRoleLoading = false;
+
+		const res = await req.json();
+		roleMenu = res;
 		editRoleModal = false;
 	};
 
@@ -204,8 +239,14 @@
 			on:click={() => {
 				createRoleMenu();
 			}}
-			class="w-full">Create</Button
+			class="w-full"
 		>
+			{#if createRoleLoading}
+				<Spinner size={4} color="gray" />
+			{:else}
+				Create
+			{/if}
+		</Button>
 	</div>
 </Modal>
 
@@ -230,14 +271,26 @@
 
 <Modal bind:open={deleteRoleModal} title={`Delete ${roleMenu[selectRoleMenu]?.name}?`} size="xs">
 	<div class="flex gap-4">
-		<Button color="alternative" class="w-full">Cancel</Button>
+		<Button
+			on:click={() => {
+				deleteRoleModal = false;
+			}}
+			color="alternative"
+			class="w-full">Cancel</Button
+		>
 		<Button
 			on:click={() => {
 				deleteRoleMenu();
 			}}
 			color="red"
-			class="w-full">Delete</Button
+			class="w-full"
 		>
+			{#if deleteRoleLoading}
+				<Spinner size={4} color="gray" />
+			{:else}
+				Delete
+			{/if}
+		</Button>
 	</div>
 </Modal>
 
@@ -306,8 +359,14 @@
 				color="green"
 				on:click={() => {
 					saveRole();
-				}}><Icon icon="material-symbols:save" class="text-xl" /></Button
+				}}
 			>
+				{#if saveRoleLoading}
+					<Spinner size={4} color="gray" />
+				{:else}
+					<Icon icon="material-symbols:save" class="text-xl" />
+				{/if}
+			</Button>
 		</ButtonGroup>
 	</svelte:fragment>
 </Modal>

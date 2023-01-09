@@ -12,7 +12,21 @@
   const guild = data.guild;
   let guildRoles = data.guild.roles.filter((role) => role.name !== '@everyone' && !role.managed);
 	guildRoles = guildRoles.map(role => {return { name: role.name, value: role.id }});
-  let roles = [];
+  let permissions = data.permissions;
+
+  const updateGuild = async () => {
+    const res = await fetch(`/api/guild/${guild.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        permissions
+      })
+    });
+    const json = await res.json();
+    permissions = json.permissions;
+  };
 </script>
 
 {#if guild.owner_id == data.user.id}
@@ -33,7 +47,11 @@
         <Dropdown>
           {#each guildRoles as role}
             <DropdownItem>
-              <Checkbox bind:group={roles} value={role.value}>{role.name}</Checkbox>
+              <Checkbox on:change={
+                () => {
+                  updateGuild()
+                }
+              } bind:group={permissions} value={role.value}>{role.name}</Checkbox>
             </DropdownItem>
           {/each}
         </Dropdown>
