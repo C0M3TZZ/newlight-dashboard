@@ -23,13 +23,14 @@ export async function PATCH({ cookies, request, params }) {
 	) {
 		throw new error(403, 'User does not have permission to do this');
 	}
-	const { roles } = await request.json();
+	const { roles, max } = await request.json();
 	await prisma.roleMenu.update({
 		where: {
 			id: params.role_id
 		},
 		data: {
-			roles: roles
+			roles: roles,
+			max: max
 		}
 	});
 	return new Response(
@@ -41,7 +42,8 @@ export async function PATCH({ cookies, request, params }) {
 				select: {
 					id: true,
 					name: true,
-					roles: true
+					roles: true,
+					max: true
 				}
 			})
 		),
@@ -86,7 +88,8 @@ export async function DELETE({ cookies, params }) {
 				select: {
 					id: true,
 					name: true,
-					roles: true
+					roles: true,
+					max: true
 				}
 			})
 		),

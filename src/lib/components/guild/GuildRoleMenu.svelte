@@ -9,7 +9,7 @@
 		Select,
 		Dropdown,
 		Helper,
-		Spinner
+		Spinner,
 	} from 'flowbite-svelte';
 	import Icon from '@iconify/svelte';
 	import autoAnimate from '@formkit/auto-animate';
@@ -33,6 +33,7 @@
 	let selectRoleMenu = 0;
 	let createRoleMenuInput = '';
 	let sendChannelValue = '';
+	let sendChannelText = '';
 	let guildChannels = data.channels.filter((channel) => channel.type === 0);
 	guildChannels = guildChannels.map((channel) => {
 		return { name: channel.name, value: channel.id };
@@ -42,6 +43,14 @@
 	let roleMenuEmpty = '';
 	let createRoleMenuValid = '';
 
+	let MAX_ROLE = [];
+	for (let index = 0; index < Array(25).length; index++) {
+		MAX_ROLE.push({
+			name: index + 1,
+			value: index + 1
+		});
+	}
+
 	const validatorRequire = (value) => {
 		if (value.length < 1) {
 			return false;
@@ -49,7 +58,7 @@
 		return true;
 	};
 
-	const sendChannel = () => {
+	const sendChannel = async () => {
 		sendChannelValid = validatorRequire(sendChannelValue);
 		if (!sendChannelValid) {
 			return;
@@ -58,8 +67,20 @@
 		if (!roleMenuEmpty) {
 			return;
 		}
+		console.log(sendChannelText)
+		await fetch(`/api/guild/${roleMenu[selectRoleMenu].id}/rolemenu/${sendChannelValue}/send`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				message: sendChannelText
+			})
+		});
+		
 		sendRoleModal = false;
 		sendChannelValue = '';
+		sendChannelText = '';
 	};
 
 	const createRoleMenu = async () => {
@@ -74,7 +95,8 @@
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
-				name: createRoleMenuInput
+				name: createRoleMenuInput,
+				max: 1,
 			})
 		});
 		createRoleLoading = false;
@@ -142,7 +164,8 @@
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
-				roles: roleMenu[selectRoleMenu].roles
+				roles: roleMenu[selectRoleMenu].roles,
+				max: roleMenu[selectRoleMenu].max
 			})
 		});
 		saveRoleLoading = false;
@@ -261,6 +284,10 @@
 			<Helper color="red">Rolemenu is empty.</Helper>
 		{/if}
 	</Label>
+	<Label class="flex flex-col space-y-2 text-start">
+		<span> Message </span>
+		<Input placeholder="Please Select Role (Optional)." bind:value={sendChannelText}/>
+	</Label>
 	<Button
 		class="w-full"
 		on:click={() => {
@@ -347,26 +374,34 @@
 		{/each}
 	</div>
 	<svelte:fragment slot="footer">
-		<ButtonGroup class="w-full">
-			<Button
-				class="w-full text-xl"
-				on:click={() => {
-					addRole();
-				}}><Icon icon="material-symbols:add-rounded" /></Button
-			>
-			<Button
-				class="w-full"
-				color="green"
-				on:click={() => {
-					saveRole();
-				}}
-			>
-				{#if saveRoleLoading}
-					<Spinner size={4} color="gray" />
-				{:else}
-					<Icon icon="material-symbols:save" class="text-xl" />
-				{/if}
-			</Button>
-		</ButtonGroup>
+		<div class="flex gap-4 w-full flex-col">
+			<div class="w-full">
+				<Label class="space-y-2 flex flex-col text-start">
+					<span>Max Role</span>
+					<Select bind:value={roleMenu[selectRoleMenu].max} items={MAX_ROLE}></Select>
+				</Label>
+			</div>
+			<ButtonGroup class="w-full">
+				<Button
+					class="w-full text-xl"
+					on:click={() => {
+						addRole();
+					}}><Icon icon="material-symbols:add-rounded" /></Button
+				>
+				<Button
+					class="w-full"
+					color="green"
+					on:click={() => {
+						saveRole();
+					}}
+				>
+					{#if saveRoleLoading}
+						<Spinner size={4} color="gray" />
+					{:else}
+						<Icon icon="material-symbols:save" class="text-xl" />
+					{/if}
+				</Button>
+			</ButtonGroup>
+		</div>
 	</svelte:fragment>
 </Modal>

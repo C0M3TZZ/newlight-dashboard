@@ -31,7 +31,8 @@ export async function POST({ request, cookies, params }) {
 	await prisma.roleMenu.create({
 		data: {
 			guildId: params.id,
-			name: name
+			name: name,
+      max: 1,
 		}
 	});
 	return new Response(
@@ -43,7 +44,8 @@ export async function POST({ request, cookies, params }) {
 				select: {
 					id: true,
 					name: true,
-					roles: true
+					roles: true,
+          max: true,
 				}
 			})
 		),
@@ -64,7 +66,8 @@ export async function GET({ params }) {
 		select: {
 			id: true,
 			name: true,
-			roles: true
+			roles: true,
+      max: true
 		}
 	});
 	return new Response(JSON.stringify(guild), {
@@ -109,7 +112,8 @@ export async function DELETE({ cookies ,request, params }) {
 				select: {
 					id: true,
 					name: true,
-					roles: true
+					roles: true,
+          max: true
 				}
 			})
 		),
