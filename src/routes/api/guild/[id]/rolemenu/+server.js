@@ -23,7 +23,7 @@ export async function POST({ request, cookies, params }) {
 	}
 	const guildData = await getGuild(params.id);
 	if (
-		!member.roles.every((role) => guild.permissions.includes(role)) &&
+		!member.roles.some((role) => guild?.permissions.includes(role)) &&
 		member.user.id !== guildData.owner_id
 	) {
 		throw new error(403, 'User does not have permission to do this');
@@ -91,7 +91,7 @@ export async function DELETE({ cookies ,request, params }) {
 	}
 	const guildData = await getGuild(params.id);
 	if (
-		!member.roles.every((role) => guild.permissions.includes(role)) &&
+		!member.roles.some((role) => guild?.permissions.includes(role)) &&
 		member.user.id !== guildData.owner_id
 	) {
 		throw new error(403, 'User does not have permission to do this');

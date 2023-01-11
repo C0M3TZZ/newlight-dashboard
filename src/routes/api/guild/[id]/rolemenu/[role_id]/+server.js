@@ -1,7 +1,6 @@
-import { getMemberGuild } from '$lib/server/discord';
+import { getMemberGuild, getGuild } from '$lib/server/discord';
 import { PrismaClient } from '@prisma/client';
 import { error } from '@sveltejs/kit';
-import { getGuild } from '$lib/server/discord';
 const prisma = new PrismaClient();
 
 /** @type {import('./$types').RequestHandler} */
@@ -18,7 +17,7 @@ export async function PATCH({ cookies, request, params }) {
 	}
 	const guildData = await getGuild(params.id);
 	if (
-		!member.roles.every((role) => guild.permissions.includes(role)) &&
+		!member.roles.some((role) => guild.permissions.includes(role)) &&
 		member.user.id !== guildData.owner_id
 	) {
 		throw new error(403, 'User does not have permission to do this');
@@ -57,7 +56,7 @@ export async function PATCH({ cookies, request, params }) {
 
 /** @type {import('./$types').RequestHandler} */
 export async function DELETE({ cookies, params }) {
-	const member = await getMemberGuild(cookies.get('access_token'), params.id);
+	const member = await getMemberGuild(await cookies.get('access_token'), params.id);
 	const guild = await prisma.guild.findUnique({
 		where: { guildId: params.id }
 	});
@@ -69,7 +68,7 @@ export async function DELETE({ cookies, params }) {
 	}
 	const guildData = await getGuild(params.id);
 	if (
-		!member.roles.every((role) => guild.permissions.includes(role)) &&
+		!member.roles.some((role) => guild.permissions.includes(role)) &&
 		member.user.id !== guildData.owner_id
 	) {
 		throw new error(403, 'User does not have permission to do this');

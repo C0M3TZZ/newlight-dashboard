@@ -17,6 +17,7 @@
 	import { addToast } from '$lib/toastManager';
 
 	export let data;
+	// console.log(data);
 	let createRoleLoading = false;
 	let createRoleModal = false;
 	let sendRoleModal = false;
@@ -67,7 +68,7 @@
 		if (!roleMenuEmpty) {
 			return;
 		}
-		console.log(sendChannelText)
+
 		await fetch(`/api/guild/${roleMenu[selectRoleMenu].id}/rolemenu/${sendChannelValue}/send`, {
 			method: 'POST',
 			headers: {
@@ -154,7 +155,7 @@
 				validatorRequire(role.name) && validatorRequire(role.desc) && validatorRequire(role.roleId);
 		});
 		roleMenu = roleMenu;
-		if (!roleMenu[selectRoleMenu].roles.every((role) => role.validate)) {
+		if (!roleMenu[selectRoleMenu].roles.some((role) => role.validate)) {
 			return;
 		}
 		saveRoleLoading = true;

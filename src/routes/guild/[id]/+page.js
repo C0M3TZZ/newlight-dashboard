@@ -7,11 +7,13 @@ export async function load({ params, parent }) {
 	const req_channels = await fetch(`${HOST}/api/discord/guild/${params.id}/channels`);
 	const req_permissions = await fetch(`${HOST}/api/guild/${guildId}`);
 	const req_rolemenu = await fetch(`${HOST}/api/guild/${guildId}/rolemenu`);
+	const req_hasPermission = await fetch(`${HOST}/api/guild/${guildId}/permission`);
 	const getGuild = await req_guild.json();
 	let channels = [];
 	let permissions = [];
 	let roleMenu = [];
-	console.log(getGuild);
+
+	const {hasPermission} = await req_hasPermission.json();
 
 	if (req_channels.status === 200) {
 		channels = await req_channels.json();
@@ -33,7 +35,8 @@ export async function load({ params, parent }) {
 			channels: channels,
 			guildId,
 			permissions: await permissions,
-			roleMenu: await roleMenu
+			roleMenu: await roleMenu,
+			hasPermission: await hasPermission
 		};
 	} else {
 		return {
@@ -41,7 +44,8 @@ export async function load({ params, parent }) {
 			channels: channels,
 			guildId,
 			permissions: await permissions,
-			roleMenu: await roleMenu
+			roleMenu: await roleMenu,
+			hasPermission: await hasPermission
 		};
 	}
 }
