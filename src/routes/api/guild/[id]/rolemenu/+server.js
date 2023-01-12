@@ -32,7 +32,6 @@ export async function POST({ request, cookies, params }) {
 		data: {
 			guildId: params.id,
 			name: name,
-      max: 1,
 		}
 	});
 	return new Response(

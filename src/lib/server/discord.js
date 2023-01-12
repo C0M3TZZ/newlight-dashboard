@@ -43,6 +43,9 @@ export const isOwner = async (guildId, access_token) => {
 
 export const getMemberGuild = async (access_token, guildId) => {
   const user = await getUser(access_token);
+  if (!user) {
+    return null;
+  }
   const req_guild = await fetch(`${DISCORD_API_URL}/guilds/${guildId}/members/${await user.id}`, {
     headers: {
       Authorization: `Bot ${DISCORD_BOT_TOKEN}`
